@@ -197,3 +197,367 @@ Jika UI berubah dinamis (misalnya, berubah dengan interaksi pengguna), gunakan S
 - `ScaffoldMessenger`: Widget yang digunakan untuk menampilkan SnackBar, yaitu pesan ringkas di bagian bawah layar.
 
 - `SnackBar`: Widget yang menampilkan pesan ringkas yang muncul dari bawah layar.
+
+# Tugas 8
+## Membuat Halaman Formulir Penambahan Item Baru
+1. Buatlah file baru dengan nama "dvntory_form.dart" di dalam proyek Flutter Anda dan tambahkan baris import untuk material.dart dan left_drawer.dart di file "dvntory_form.dart" tersebut.
+
+2. Buatlah sebuah widget yang bernama "ItemFormPage" sebagai StatefulWidget yang berisi sebuah formulir. Gunakan widget Scaffold dan tambahkan app bar dengan judul `"Tambahkan Item Anda"`. Sesuaikan warna background dan warna teks sesuai dengan keinginan Anda.
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:dvntory_mobile/widgets/left_drawer.dart';
+import 'package:dvntory_mobile/widgets/dvntory_card.dart';
+
+class ItemFormPage extends StatefulWidget {
+  const ItemFormPage({super.key});
+
+  @override
+  State<ItemFormPage> createState() => _ItemFormPageState();
+}
+
+List<Item> items = [];
+
+class _ItemFormPageState extends State<ItemFormPage> {
+  final _formKey = GlobalKey<FormState>();
+  String _name = "";
+  int _amount = 0;
+  int _price = 0;
+  String _description = "";
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Tambahkan Item Anda'),
+        backgroundColor: const Color.fromARGB(255, 28, 56, 121),
+        foregroundColor: Colors.white,
+      ),
+      drawer: const LeftDrawer(),
+      body: Form(
+        // ... Isi formulir di sini
+      ),
+    );
+  }
+}
+```
+
+3. Dalam formulir, tambahkan elemen-elemen input seperti `Name`, `Amount`, `Price`, dan `Description`. Gunakan TextFormField dan atur dekorasinya sesuai keinginan. Tambahkan validasi pada setiap elemen input agar tidak boleh kosong dan harus sesuai dengan tipe data yang diinginkan.
+```dart
+...
+body: Form(
+  key: _formKey,
+  child: SingleChildScrollView(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TextFormField(
+            decoration: InputDecoration(
+              hintText: "Nama",
+              labelText: "Nama Item",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(5.0),
+              ),
+            ),
+            onChanged: (String? value) {
+              setState(() {
+                _name = value!;
+              });
+            },
+            validator: (String? value) {
+              if (value == null || value.isEmpty) {
+                return "Nama tidak boleh kosong!";
+              }
+              return null;
+            },
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TextFormField(
+            decoration: InputDecoration(
+              hintText: "Jumlah",
+              labelText: "Jumlah",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(5.0),
+              ),
+            ),
+            onChanged: (String? value) {
+              setState(() {
+                _amount = int.tryParse(value!) ?? 0;
+              });
+            },
+            validator: (String? value) {
+              if (value == null || value.isEmpty) {
+                return "Jumlah tidak boleh kosong!";
+              }
+              if (int.tryParse(value) == null) {
+                return "Jumlah harus berupa angka yang valid!";
+              }
+              return null;
+            },
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TextFormField(
+            decoration: InputDecoration(
+              hintText: "Harga",
+              labelText: "Harga",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(5.0),
+              ),
+            ),
+            onChanged: (String? value) {
+              setState(() {
+                _price = int.tryParse(value!) ?? 0;
+              });
+            },
+            validator: (String? value) {
+              if (value == null || value.isEmpty) {
+                return "Harga tidak boleh kosong!";
+              }
+              if (int.tryParse(value) == null) {
+                return "Harga harus berupa angka yang valid!";
+              }
+              return null;
+            },
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TextFormField(
+            decoration: InputDecoration(
+              hintText: "Deskripsi",
+              labelText: "Deskripsi",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(5.0),
+              ),
+            ),
+            onChanged: (String? value) {
+              setState(() {
+                _description = value!;
+              });
+            },
+            validator: (String? value) {
+              if (value == null || value.isEmpty) {
+                return "Deskripsi tidak boleh kosong!";
+              }
+              return null;
+            },
+          ),
+        ),
+      ],
+    ),
+  ),
+),
+...
+```
+
+4. Tambahkan tombol "Save" di bagian bawah halaman formulir dan pop-up konfirmasi yang muncul setelah tombol "Save" ditekan, yang akan menampilkan detail item yang ditambahkan.
+```dart
+Padding(
+  padding: const EdgeInsets.all(8.0),
+  child: ElevatedButton(
+    style: ButtonStyle(
+      backgroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 67, 179, 70)),
+    ),
+    onPressed: () {
+      if (_formKey.currentState!.validate()) {
+        items.add(Item(
+          name: _name,
+          price: _price,
+          description: _description,
+          amount: _amount,
+        ));
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('Item Berhasil Disimpan'),
+              content: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text('Nama: $_name'),
+                    Text('Harga: $_price'),
+                    Text('Jumlah: $_amount'),
+                    Text('Deskripsi: $_description'),
+                  ],
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('OK'),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            );
+          },
+        );
+        _formKey.currentState!.reset();
+      }
+    },
+    child: const Text(
+      "Save",
+      style: TextStyle(color: Colors.white),
+    ),
+  ),
+),
+...
+```
+
+## Membuat Drawer Menu
+1. Buatlah widget drawer di folder terpisah bernama `widgets` dan dalam file bernama `left_drawer.dart`. Drawer ini akan berisi opsi-opsi menu navigasi. Pastikan untuk melakukan `import material.dart` di dalam file tersebut.
+
+2. Buatlah widget yang bernama "LeftDrawer" sebagai StatelessWidget dengan isi drawer. Gunakan ListView untuk menampilkan opsi-opsi menu.
+```dart
+import 'package:flutter/material.dart';
+import 'package:dvntory_mobile/screens/menu.dart';
+import 'package:dvntory_mobile/screens/dvntory_form.dart';
+import 'package:dvntory_mobile/screens/dvntory_list.dart';
+
+class LeftDrawer extends StatelessWidget {
+  const LeftDrawer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Drawer(
+      child: ListView(
+        children: [
+          // ... Isi opsi-opsi menu di sini
+        ],
+      ),
+    );
+  }
+}
+```
+
+3. Tambahkan opsi-opsi menu pada drawer, seperti "Halaman Utama" dan "Tambah Produk" dengan menggunakan ListTile dan ikon yang sesuai. Gunakan Navigator.pushReplacement() untuk melakukan navigasi ke halaman yang terkait pada setiap opsi menu.
+```dart
+...
+ListTile(
+  leading: const Icon(Icons.home_outlined),
+  title: const Text('Home'),
+  // Bagian redirection ke MyHomePage
+  onTap: () {
+    Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MyHomePage(),
+        ));
+  },
+),
+ListTile(
+  leading: const Icon(Icons.checklist),
+  title: const Text('Lihat Item'),
+  // Bagian redirection ke ShopFormPage
+  onTap: () {
+    Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const ItemsPage(),
+        ));
+  },
+),
+ListTile(
+  leading: const Icon(Icons.add_shopping_cart),
+  title: const Text('Tambah Item'),
+  // Bagian redirection ke ShopFormPage
+  onTap: () {
+    /*
+    Routing ke ShopFormPage di sini, setelah halaman ShopFormPage sudah dibuat.
+    */
+    Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+            builder: (context) => const ItemFormPage()));
+  },
+),
+...
+```
+
+## Menggunakan Drawer pada Halaman Utama dan Halaman Formulir
+1. Di halaman utama di `menu.dart`, tambahkan widget LeftDrawer ke dalam widget Scaffold. Hal ini akan memunculkan menu drawer di halaman utama.
+```dart
+...
+return Scaffold(
+  appBar: AppBar(
+    centerTitle: false,
+    title: const Text(
+      'Dvntory',
+    ),
+    backgroundColor: const Color.fromARGB(255, 28, 56, 121),
+    foregroundColor: Colors.white,
+  ),
+  drawer: const LeftDrawer(),// Tambahkan drawer ke halaman utama
+  // ... Konten halaman utama
+);
+...
+```
+
+2. Di halaman formulir `dvntory_form.dart`, tambahkan juga widget LeftDrawer ke dalam widget Scaffold. Ini akan memunculkan menu drawer di halaman formulir.
+```dart
+...
+return Scaffold(
+  appBar: AppBar(
+    title: const Text('Tambahkan Item Anda'),
+    backgroundColor: const Color.fromARGB(255, 28, 56, 121),
+    foregroundColor: Colors.white,
+  ),
+  drawer: const LeftDrawer(), // Tambahkan drawer ke halaman formulir
+  // ... Konten halaman formulir
+);
+...
+```
+
+### Setelah melakukan semua langkah di atas, saya melakukan refactor pada struktur penyimpanan file untuk membuatnya lebih terorganisir.
+
+## Perbedaan antara `Navigator.push()` dan `Navigator.pushReplacement()` di Flutter
+
+- **Navigator.push()**:
+  - **Fungsi**: Digunakan untuk menambahkan sebuah route (halaman) baru ke atas stack navigasi tanpa menghapus route sebelumnya.
+  - **Konteks Penggunaan**: Ideal untuk situasi di mana Anda ingin mempertahankan halaman sebelumnya, seperti navigasi dari daftar item ke detail item. Pengguna bisa kembali ke halaman sebelumnya dengan tombol back.
+  - **Contoh**: Dari halaman beranda ke halaman detail produk.
+  ```dart
+  Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => DetailPage()),
+  );
+  ```
+  
+- **Navigator.pushReplacement()**:
+  - **Fungsi**: Menggantikan route saat ini dengan route baru di stack navigasi. Route sebelumnya dihapus.
+  - **Konteks Penggunaan**: Berguna saat Anda tidak ingin pengguna kembali ke halaman sebelumnya, misalnya setelah proses login berhasil dan Anda ingin navigasi ke homepage tanpa memberi opsi kembali ke halaman login.
+  - **Contoh**: Mengganti halaman login dengan halaman utama setelah login berhasil.
+  ```dart
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (context) => HomePage()),
+  );
+  ```
+
+## Layout Widget pada Flutter dan Konteks Penggunaannya
+- **Container**: Widget serbaguna untuk pembungkus, styling, dan positioning. Digunakan untuk membuat kotak dengan warna, ukuran, atau dekorasi tertentu.
+- **Row dan Column**: Untuk layout linear secara horizontal (Row) dan vertikal (Column). Berguna untuk menata widget dalam satu baris atau kolom.
+- **Stack**: Menumpuk widget satu di atas yang lain. Ideal untuk overlay atau positioning widget di atas widget lain.
+- **ListView**: Untuk menampilkan daftar item yang bisa di-scroll. Cocok untuk daftar yang panjang atau data yang dinamis.
+- **GridView**: Menampilkan item dalam grid. Digunakan untuk galeri foto atau item yang perlu ditampilkan secara grid.
+- **Flex dan Expanded**: Mengatur distribusi ruang antar widget dalam Row atau Column. Expanded mengambil ruang tersedia, sementara Flex memberikan kontrol lebih terhadap proporsi ruang.
+
+## Elemen Input pada Form yang Digunakan dan Alasannya
+Dalam pembuatan form, saya memilih untuk menggunakan `TextFormField` yang disertai dengan validasi input. Alasan utama penggunaan ini adalah untuk memudahkan pengambilan data teks, seperti nama produk, jumlah, harga, dan deskripsi. Untuk memastikan keakuratan data, khusus untuk bidang jumlah dan harga, saya menerapkan validasi tambahan dengan mencoba mengkonversi input tersebut menjadi tipe data `int`. Pendekatan ini membantu dalam menjamin bahwa input untuk jumlah dan harga hanya berisi nilai int yang valid.
+
+## Penerapan Clean Architecture pada Aplikasi Flutter
+Clean Architecture adalah konsep arsitektur perangkat lunak yang memisahkan kode menjadi lapisan dengan tanggung jawab yang berbeda, meningkatkan kebersihan dan kemudahan pemeliharaan kode. Dalam konteks Flutter:
+
+- **Presentation Layer**: Berisi UI dan logic UI. Menggunakan Widget untuk membangun UI dan mengambil data dari Bloc atau ViewModel.
+- **Business Logic Layer (BLL)**: Menggunakan Bloc atau Provider untuk mengelola state dan logic aplikasi.
+- **Data Layer**: Terdiri dari Repository dan Data Source. Repository bertindak sebagai mediator antara BLL dan sumber data (API, database lokal).
+- **Domain Layer**: Berisi entitas dan use case. Entitas adalah model data, dan use case menentukan operasi bisnis.
+
+Masing-masing lapisan ini harus memiliki tanggung jawab yang jelas dan terpisah untuk memudahkan testing, maintenance, dan scalability aplikasi.

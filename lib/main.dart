@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:dvntory_mobile/menu.dart';
+import 'package:dvntory_mobile/screens/menu.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,7 +14,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Dvntory',
       theme: ThemeData(
-        // Tema aplikasi
         colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 28, 56, 121)),
         useMaterial3: true,
       ),
