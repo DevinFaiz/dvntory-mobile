@@ -1,82 +1,103 @@
-import 'package:flutter/material.dart';
+import 'package:dvntory_mobile/screens/dvntory_detail.dart';
 import 'package:dvntory_mobile/widgets/left_drawer.dart';
-import 'package:dvntory_mobile/screens/dvntory_form.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:dvntory_mobile/models/product.dart';
 
-class ItemsPage extends StatefulWidget {
-  const ItemsPage({super.key});
+class ProductPage extends StatefulWidget {
+    const ProductPage({Key? key}) : super(key: key);
 
-  @override
-  State<StatefulWidget> createState() => _ItemsPageState();
+    @override
+    _ProductPageState createState() => _ProductPageState();
 }
 
-class _ItemsPageState extends State<ItemsPage> {
-  @override
-  Widget build(BuildContext context) {
+class _ProductPageState extends State<ProductPage> {
+Future<List<Product>> fetchProduct() async {
+    // TODO: Ganti URL dan jangan lupa tambahkan trailing slash (/) di akhir URL!
+    var url = Uri.parse(
+        'http://localhost:8000/json/');
+    var response = await http.get(
+        url,
+        headers: {"Content-Type": "application/json"},
+    );
+
+    // melakukan decode response menjadi bentuk json
+    var data = jsonDecode(utf8.decode(response.bodyBytes));
+
+    // melakukan konversi data json menjadi object Product
+    List<Product> list_product = [];
+    for (var d in data) {
+        if (d != null) {
+            list_product.add(Product.fromJson(d));
+        }
+    }
+    return list_product;
+}
+
+@override
+Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Item'),
-        backgroundColor: const Color.fromARGB(255, 28, 56, 121),
-        foregroundColor: Colors.white,
-      ),
-      drawer: const LeftDrawer(),
-      body: ListView.builder(
-        itemCount: items.length,
-        itemBuilder: (context, index) {
-          final item = items[index];
-          return Card(
-            margin: const EdgeInsets.all(10),
-            elevation: 5,
-            child: ListTile(
-              title: Text(
-                item.name,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("Jumlah: ${item.amount}"),
-                  Text("Harga: ${item.price}"),
-                  Text("Deskripsi: ${item.description}"),
-                ],
-              ),
-              isThreeLine: true,
-              trailing: IconButton(
-                icon: const Icon(Icons.info_outline, color: Colors.black),
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: Text(item.name),
-                        content: SingleChildScrollView(
-                          child: ListBody(
-                            children: <Widget>[
-                              Text("Jumlah: ${item.amount}"),
-                              Text("Harga: ${item.price}"),
-                              Text("Deskripsi: ${item.description}"),
-                            ],
+        appBar: AppBar(
+          title: const Text('Item'),
+          backgroundColor: const Color.fromARGB(255, 28, 56, 121),
+          foregroundColor: Colors.white,
+        ),
+        drawer: const LeftDrawer(),
+        body: FutureBuilder(
+            future: fetchProduct(),
+            builder: (context, AsyncSnapshot snapshot) {
+                if (snapshot.data == null) {
+                    return const Center(child: CircularProgressIndicator());
+                } else {
+                    if (!snapshot.hasData) {
+                    return const Column(
+                        children: [
+                        Text(
+                            "Tidak ada data produk.",
+                            style:
+                                TextStyle(color: Color(0xff59A5D8), fontSize: 20),
+                        ),
+                        SizedBox(height: 8),
+                        ],
+                    );
+                } else {
+                    return ListView.builder(
+                      itemCount: snapshot.data!.length,
+                      itemBuilder: (_, index) => InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => DetailProductPage(
+                                product: snapshot.data![index],
+                              ),
+                            ),
+                          );
+                        },
+                        child: Card(
+                          elevation: 3,
+                          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "${snapshot.data![index].fields.name}",
+                                  style: const TextStyle(
+                                    fontSize: 14.0,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                        actions: <Widget>[
-                          TextButton(
-                            child: const Text('Tutup'),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
+                      ),
+                    );
+                  }
+                }
+            }));
+    }
 }
