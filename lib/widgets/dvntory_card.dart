@@ -62,7 +62,7 @@ class MenuCard extends StatelessWidget {
           else if (item.name == "Keluar") {
             final response = await request.logout(
                 // TODO: Ganti URL dan jangan lupa tambahkan trailing slash (/) di akhir URL!
-                "http://localhost:8000/auth/logout/");
+                "http://10.0.2.2:8000/auth/logout/");
             String message = response["message"];
             if (response['status']) {
               String uname = response["username"];
